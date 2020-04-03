@@ -7,20 +7,10 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/api/users', (req, res) => {
-  userController.getAll(req, res);
-});
-app.get('/api/users/:id', (req, res) => {
-  userController.getOne(req, res);
-});
-app.post('/api/users', (req, res) => {
-  userController.add(req, res);
-});
-app.delete('/api/users/:id', (req, res) => {
-  userController.remove(req, res);
-});
-app.patch('/api/users/:id', (req, res) => {
-  userController.change(req, res);
-});
+app.get('/api/users', userController.getAll);
+app.get('/api/users/:id', userController.getOne);
+app.post('/api/users', userController.add);
+app.delete('/api/users/:id', userController.remove);
+app.patch('/api/users/:id', userController.change);
 
 module.exports = app;
