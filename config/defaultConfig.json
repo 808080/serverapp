@@ -1,0 +1,8 @@
+{
+  "development": {
+    "port": 3000,
+    "hashType": "your hash",
+    "hashKey": "your key",
+    "mongoConnection": "mongodb://localhost:27017/serverdb"
+  }
+}
