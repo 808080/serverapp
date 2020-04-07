@@ -13,5 +13,5 @@ mongoose.connect(config.mongoConnection, {
 });
 
 server.listen(config.port, () => {
-  console.log(`Server is listening to ${config.port} port`);
+  console.log(`Server is listening on ${config.port} port`);
 });

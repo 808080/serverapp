@@ -16,7 +16,6 @@ const userSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    immutable: true,
     minlength: 5
   },
   createdOn: {

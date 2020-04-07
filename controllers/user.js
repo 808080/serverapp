@@ -2,61 +2,83 @@ const User = require('../models/User');
 const encrypt = require('../utils/encrypter');
 
 const getOne = async (req, res) => {
-  const id = req.params.id;
-  const user = await User.findById(id);
-  if (!user) {
-    return res.sendStatus(404);
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.sendStatus(404);
+    }
+    res.json(user);
+  } catch (err) {
+    return res.status(500).send(err.message);
   }
-  res.json(user);
 }
 
 const getAll = async (req, res) => {
-  const users = await User.find({});
-  if (!users) {
-    return res.sendStatus(404);
+  try {
+    const users = await User.find({});
+    if (!users) {
+      return res.sendStatus(404);
+    }
+    res.json(users);
+  } catch (err) {
+    return res.status(500).send(err.message);
   }
-  res.json(users);
 }
 
-const add = async (req, res) => {
-  if (!req.body) return res.status(400).send('Invalid user data');
-  req.body.password = encrypt(req.body.password);
-  const { ...values } = req.body;
-  let user = await new User({ ...values }).save();
+const create = async (req, res) => {
+  try {
+    const body = req.body;
+    body.password = encrypt(req.body.password);
+    const { ...values } = body;
+    let user = await new User({ ...values }).save();
 
-  if (!user) {
-    return res.status(400).send('User was not added');
+    if (!user) {
+      return res.status(400).send('User was not added');
+    }
+    user = user.toJSON();
+    delete user.password;
+    res.json(user);
+  } catch (err) {
+    return res.status(500).send(err.message);
   }
-  user = user.toJSON();
-  delete user.password;
-  res.json(user);
 }
 
 const remove = async (req, res) => {
-  const id = req.params.id;
-  const user = await User.findByIdAndDelete(id);
-  if (!user) {
-    return res.sendStatus(404);
+  try {
+    const id = req.params.id;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.sendStatus(404);
+    }
+    res.json(user);
+  } catch (err) {
+    return res.status(500).send(err.message);
   }
-  res.json(user);
 }
 
-const change = async (req, res) => {
-  if (!req.params.id) return res.status(400).send('User is not found');
-  const id = req.params.id;
-  const { ...newValues } = req.body;
+const update = async (req, res) => {
+  try {
+    if (!req.params.id) return res.status(400).send('User is not found');
+    const id = req.params.id;
+    const body = req.body;
+    body.password = encrypt(req.body.password);
+    const { ...newValues } = body;
 
-  const user = await User.findOneAndUpdate({ _id: id }, { ...newValues }, { new: true });
-  if (!user) {
-    return res.sendStatus(404);
+    const user = await User.findOneAndUpdate({ _id: id }, { ...newValues }, { new: true });
+    if (!user) {
+      return res.sendStatus(404);
+    }
+    res.json(user);
+  } catch (err) {
+    return res.status(500).send(err.message);
   }
-  res.json(user);
 }
 
 module.exports = {
   getOne,
   getAll,
-  add,
+  create,
   remove,
-  change
+  update
 };

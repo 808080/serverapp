@@ -18,8 +18,8 @@ app.use(checkAuth);
 app.get("/auth", userAuth.authorize)
 app.get('/api/users', userController.getAll);
 app.get('/api/users/:id', userController.getOne);
-app.post('/api/users', userController.add);
-app.patch('/api/users/:id', userController.change);
+app.post('/api/users', userController.create);
+app.patch('/api/users/:id', userController.update);
 app.delete('/api/users/:id', userController.remove);
 
 
