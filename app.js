@@ -10,10 +10,12 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get("/sign-in", userAuth.login);
+app.post("/auth/sign-in", userAuth.signIn);
+app.post("/auth/sign-up", userAuth.signUp);
 
 app.use(checkAuth);
 
+app.get("/auth", userAuth.authorize)
 app.get('/api/users', userController.getAll);
 app.get('/api/users/:id', userController.getOne);
 app.post('/api/users', userController.add);

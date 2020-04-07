@@ -3,7 +3,7 @@ const User = require('../models/User');
 const generateAuthToken = require('../utils/token');
 
 
-const login = async (req, res) => {
+const signIn = async (req, res) => {
   const login = req.body.login;
   const password = encrypt(req.body.password);
 
@@ -19,16 +19,35 @@ const login = async (req, res) => {
   if (user.password !== password) {
     return res.status(400).send('Wrong password');
   }
-  user = await User.findOne({ login }).select('-password');
-  const token = await generateAuthToken(user._id);
+  user = user.toJSON();
+  delete user.password;
+  const token = await generateAuthToken({id: user._id});
   return res.status(200).send({ user, token });
 }
 
-const register = (req, res) => {
-  //todo
+const signUp = async (req, res) => {
+  if (!req.body) return res.status(400).send('Invalid user data');
+  req.body.password = encrypt(req.body.password);
+  const { ...values } = req.body;
+  let user = await new User({ ...values }).save();
+
+  if (!user) {
+    return res.status(400).send('User was not added');
+  }
+  user = user.toJSON();
+  delete user.password;
+  const token = await generateAuthToken({id: user._id});
+  return res.status(200).send({ user, token });
+}
+
+const authorize = (req, res) => {
+  const user = req.user.toJSON();
+  delete user.password;
+  res.json(user);
 }
 
 module.exports = {
-  login,
-  register
+  signIn,
+  signUp,
+  authorize
 };

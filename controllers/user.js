@@ -27,7 +27,8 @@ const add = async (req, res) => {
   if (!user) {
     return res.status(400).send('User was not added');
   }
-  user = await User.findById(user._id).select('-password');
+  user = user.toJSON();
+  delete user.password;
   res.json(user);
 }
 

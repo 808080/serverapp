@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 
-generateAuthToken = (id) => {
-  return jwt.sign({ _id: id }, config.jwtKey);
+generateAuthToken = (data) => {
+  return jwt.sign(data, config.jwtKey);
 }
 
 module.exports = generateAuthToken;

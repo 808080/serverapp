@@ -1,22 +1,20 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-
+const User = require('../models/User');
 
 const checkAuth = async (req, res, next) => {
-  let token;
   try {
-    token = req.headers['authorization'].split(' ')[1];
-  } catch {
-    return res.sendStatus(403);
-  }
-
-  jwt.verify(token, config.jwtKey, (err) => {
-    if (err) {
-      return res.sendStatus(403);
+    const token = req.headers.authorization.split(' ')[1];
+    const { _id } = await jwt.verify(token, config.jwtKey);
+    const user = await User.findById(_id);
+    if (!user) {
+      return res.sendStatus(401);
     }
-
+    req.user = user;
     next();
-  });
-}
+  } catch {
+    return res.sendStatus(401);
+  };
+};
 
 module.exports = checkAuth;
