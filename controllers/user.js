@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const encrypt = require('../utils/encrypter');
 
 const getOne = async (req, res) => {
   const id = req.params.id;
@@ -6,7 +7,7 @@ const getOne = async (req, res) => {
   if (!user) {
     return res.sendStatus(404);
   }
-  res.json(user)
+  res.json(user);
 }
 
 const getAll = async (req, res) => {
@@ -19,12 +20,14 @@ const getAll = async (req, res) => {
 
 const add = async (req, res) => {
   if (!req.body) return res.status(400).send('Invalid user data');
+  req.body.password = encrypt(req.body.password);
   const { ...values } = req.body;
-  const user = await new User({ ...values }).save();
+  let user = await new User({ ...values }).save();
 
   if (!user) {
     return res.status(400).send('User was not added');
   }
+  user = await User.findById(user._id).select('-password');
   res.json(user);
 }
 
