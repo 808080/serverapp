@@ -4,10 +4,12 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   firstName: {
-    type: String
+    type: String,
+    trim: true
   },
   lastName: {
-    type: String
+    type: String,
+    trim: true
   },
   dob: {
     type: Date
@@ -16,6 +18,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    trim: true,
     minlength: 5
   },
   createdOn: {
@@ -26,7 +29,10 @@ const userSchema = new Schema({
     type: String,
     required: true,
     select: false,
-    minlength: 4
+    minlength: 5
+  },
+  avatar:{
+    type: String,
   }
 }, { versionKey: false });
 

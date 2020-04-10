@@ -2,7 +2,6 @@ const encrypt = require('../utils/encrypter');
 const User = require('../models/User');
 const generateAuthToken = require('../utils/token');
 
-
 const signIn = async (req, res) => {
   try {
     const login = req.body.login;
@@ -34,9 +33,14 @@ const signUp = async (req, res) => {
     const body = req.body;
     body.password = encrypt(req.body.password);
     const { ...values } = body;
-    let user = await User.create({ ...values });
-    if (!user) {
-      return res.status(400).send('User was not added');
+    let user
+    try {
+      user = await User.create({ ...values });
+    } catch (err) {
+      if(err.code === 11000){
+        return res.status(409).send(err.message);
+      }
+      return res.status(400).send(err.message);
     }
     user = user.toJSON();
     delete user.password;

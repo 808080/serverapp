@@ -62,9 +62,16 @@ const update = async (req, res) => {
     if (!req.params.id) return res.status(400).send('User is not found');
     const id = req.params.id;
     const body = req.body;
-    body.password = encrypt(req.body.password);
-    const { ...newValues } = body;
 
+    if (body.password) {
+      body.password = encrypt(req.body.password);
+    }
+
+    if (req.file) {
+      body.avatar = `${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}`;
+    }
+
+    const { ...newValues } = body;
     const user = await User.findOneAndUpdate({ _id: id }, { ...newValues }, { new: true });
     if (!user) {
       return res.sendStatus(404);
