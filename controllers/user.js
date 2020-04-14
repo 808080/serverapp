@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const encrypt = require('../utils/encrypter');
+const isValidPass = require('../utils/isValidPass');
 
 const getOne = async (req, res) => {
   try {
@@ -28,10 +29,12 @@ const getAll = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const body = req.body;
+    if(!isValidPass(req.body.password)){
+      return res.sendStatus(400);
+    }
+    const body = { ...req.body };
     body.password = encrypt(req.body.password);
-    const { ...values } = body;
-    let user = await new User({ ...values }).save();
+    let user = await new User(body).save();
 
     if (!user) {
       return res.status(400).send('User was not added');
@@ -64,15 +67,17 @@ const update = async (req, res) => {
     const body = req.body;
 
     if (body.password) {
+      if(!isValidPass(req.body.password)){
+        return res.sendStatus(400);
+      }
       body.password = encrypt(req.body.password);
     }
 
     if (req.file) {
-      body.avatar = `${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}`;
+      body.avatar = `${req.file.destination}/${req.file.filename}`.substr(1);
     }
 
-    const { ...newValues } = body;
-    const user = await User.findOneAndUpdate({ _id: id }, { ...newValues }, { new: true });
+    const user = await User.findOneAndUpdate({ _id: id }, body, { new: true });
     if (!user) {
       return res.sendStatus(404);
     }

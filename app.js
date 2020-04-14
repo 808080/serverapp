@@ -4,7 +4,10 @@ const bodyParser = require('body-parser');
 const userController = require('./controllers/user');
 const userAuth = require('./controllers/auth');
 const checkAuth = require('./middleware/checkAuth');
-const imageUpload = require('./middleware/imageUpload');
+const avatarUpload = require('./middleware/avatarUpload');
+const bookImgUpload = require('./middleware/bookImgUpload');
+
+const bookController = require('./controllers/book');
 
 const app = express();
 
@@ -17,17 +20,24 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/public', express.static('public'));
+app.use(express.static(__dirname));
 
 app.post("/auth/sign-in", userAuth.signIn);
 app.post("/auth/sign-up", userAuth.signUp);
+
+app.get('/api/books', bookController.getAll);
+app.get('/api/books/:id', bookController.getOne);
 
 app.get("/auth", checkAuth, userAuth.authorize);
 app.get('/api/users', checkAuth, userController.getAll);
 app.get('/api/users/:id', checkAuth, userController.getOne);
 app.post('/api/users', checkAuth, userController.create);
-app.patch('/api/users/:id', checkAuth, imageUpload, userController.update);
+app.patch('/api/users/:id', checkAuth, avatarUpload, userController.update);
 app.delete('/api/users/:id', checkAuth, userController.remove);
+
+app.post('/api/books', checkAuth, bookImgUpload, bookController.create);
+app.patch('/api/books/:id', checkAuth, bookImgUpload, bookController.update);
+app.delete('/api/books/:id', checkAuth, bookController.remove);
 
 
 module.exports = app;

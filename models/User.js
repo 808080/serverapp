@@ -12,7 +12,7 @@ const userSchema = new Schema({
     trim: true
   },
   dob: {
-    type: Date
+    type: String
   },
   login: {
     type: String,
@@ -28,8 +28,7 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true,
-    select: false,
-    minlength: 5
+    select: false
   },
   avatar:{
     type: String,

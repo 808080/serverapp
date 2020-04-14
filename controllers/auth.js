@@ -1,6 +1,7 @@
 const encrypt = require('../utils/encrypter');
 const User = require('../models/User');
 const generateAuthToken = require('../utils/token');
+const isValidPass = require('../utils/isValidPass');
 
 const signIn = async (req, res) => {
   try {
@@ -30,23 +31,20 @@ const signIn = async (req, res) => {
 
 const signUp = async (req, res) => {
   try {
-    const body = req.body;
-    body.password = encrypt(req.body.password);
-    const { ...values } = body;
-    let user
-    try {
-      user = await User.create({ ...values });
-    } catch (err) {
-      if(err.code === 11000){
-        return res.status(409).send(err.message);
-      }
-      return res.status(400).send(err.message);
+    if(!isValidPass(req.body.password)){
+      return res.sendStatus(400);
     }
+    const body = { ...req.body };
+    body.password = encrypt(req.body.password);
+    let user = await User.create(body);
     user = user.toJSON();
     delete user.password;
     const token = await generateAuthToken({ id: user._id });
     return res.status(200).send({ user, token });
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).send(err.message);
+    }
     return res.status(500).send(err.message);
   }
 }
