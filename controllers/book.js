@@ -4,7 +4,7 @@ const getOne = async (req, res) => {
   try {
     const id = req.params.id;
     const book = await Book.findById(id);
-    if (!user) {
+    if (!book) {
       return res.sendStatus(404);
     }
     res.json(book);
@@ -15,11 +15,30 @@ const getOne = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const books = await Book.find({});
+    const perPage = +req.query.perPage || 5;
+    const page = +req.query.page || 1;
+    const order = +req.query.order || 1;
+
+    let searchParams = {};
+    if (req.query.search) {
+      const searchReq = req.query.search;
+      searchParams = { $or: [
+        { title: { $regex: searchReq, $options: 'i' } }, 
+        { author: { $regex: searchReq, $options: 'i' } },
+        { description: { $regex: searchReq, $options: 'i' } },
+        { fragment: { $regex: searchReq, $options: 'i' } }
+      ] };
+    }
+
+    const books = await Book.find(searchParams)
+      .skip((perPage * page) - perPage)
+      .limit(perPage)
+      .sort({ title: order });
+    const booksTotal = await Book.countDocuments(searchParams);
     if (!books) {
       return res.sendStatus(404);
     }
-    res.json(books);
+    res.json({ booksTotal, books });
   } catch (err) {
     return res.status(500).send(err.message);
   }
