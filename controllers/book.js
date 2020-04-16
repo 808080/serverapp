@@ -18,16 +18,21 @@ const getAll = async (req, res) => {
     const perPage = +req.query.perPage || 5;
     const page = +req.query.page || 1;
     const order = +req.query.order || 1;
+    const maxPrice = +req.query.maxPrice || Infinity;
+    const minPrice = +req.query.minPrice || 0;
 
-    let searchParams = {};
+    let searchParams = { price: { $lte: maxPrice, $gte: minPrice } };
     if (req.query.search) {
       const searchReq = req.query.search;
-      searchParams = { $or: [
-        { title: { $regex: searchReq, $options: 'i' } }, 
-        { author: { $regex: searchReq, $options: 'i' } },
-        { description: { $regex: searchReq, $options: 'i' } },
-        { fragment: { $regex: searchReq, $options: 'i' } }
-      ] };
+      searchParams = {
+        $or: [
+          { title: { $regex: searchReq, $options: 'i' } },
+          { author: { $regex: searchReq, $options: 'i' } },
+          { description: { $regex: searchReq, $options: 'i' } },
+          { fragment: { $regex: searchReq, $options: 'i' } }
+        ],
+        $and: [{ price: { $lte: maxPrice, $gte: minPrice } }]
+      };
     }
 
     const books = await Book.find(searchParams)
