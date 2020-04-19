@@ -6,11 +6,11 @@ const generateAuthToken = (data) => {
   return jwt.sign(data, config.jwtKey);
 }
 
-const hash = (password) => {
+const hashPassword = (password) => {
   return crypto.createHmac(config.hashType, config.hashKey).update(password).digest('hex');
 };
 
 module.exports = { 
-  hash,
+  hashPassword,
   generateAuthToken
 };

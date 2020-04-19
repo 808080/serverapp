@@ -1,4 +1,5 @@
 const Book = require('../models/Book');
+const fs = require('fs');
 
 const getOne = async (req, res) => {
   try {
@@ -40,7 +41,7 @@ const getAll = async (req, res) => {
       .limit(perPage)
       .sort({ title: order });
     const booksTotal = await Book.countDocuments(searchParams);
-   
+
     res.json({ booksTotal, books });
   } catch (err) {
     return res.status(500).send(err.message);
@@ -60,7 +61,7 @@ const create = async (req, res) => {
     }
 
     const book = await new Book(body).save();
-   
+
     res.json(book);
   } catch (err) {
     return res.status(500).send(err.message);
@@ -85,19 +86,24 @@ const update = async (req, res) => {
     const body = req.body;
 
     if (req.files) {
-      body.images = [];
-
       for (let i = 0; i < req.files.length; i++) {
         body.images.push(`${req.files[i].destination}/${req.files[i].filename}`.substr(1));
       }
     }
 
+    if (req.query.imgInd >= 0) {
+      const index = +req.query.imgInd;
+      const [deletedImg] = body.images.splice(index, 1);
 
-    const book = await User.findOneAndUpdate({ _id: id }, body, { new: true });
+      fs.unlink(process.cwd() + deletedImg, (err) => {
+        if (err) throw err;
+      });
+    }
+
+    const book = await Book.findOneAndUpdate({ _id: id }, body, { new: true });
     if (!book) {
       return res.sendStatus(404);
     }
-        //add pic del
 
     res.json(book);
   } catch (err) {

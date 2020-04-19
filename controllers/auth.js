@@ -1,12 +1,11 @@
-const encrypt = require('../utils/encrypter');
 const User = require('../models/User');
-const generateAuthToken = require('../utils/token');
-const isValidPass = require('../utils/isValidPass');
+const { hashPassword, generateAuthToken } = require('../utils');
+const isValidPass = require('../utils/validation');
 
 const signIn = async (req, res) => {
   try {
     const login = req.body.login;
-    const password = encrypt(req.body.password);
+    const password = hashPassword(req.body.password);
 
     if (!login || !password) {
       return res.status(404).send('Username and password must be filled in!');
@@ -31,11 +30,11 @@ const signIn = async (req, res) => {
 
 const signUp = async (req, res) => {
   try {
-    if(!isValidPass(req.body.password)){
+    if (!isValidPass(req.body.password)) {
       return res.sendStatus(400);
     }
     const body = { ...req.body };
-    body.password = encrypt(req.body.password);
+    body.password = hashPassword(req.body.password);
     let user = await User.create(body);
     user = user.toJSON();
     delete user.password;

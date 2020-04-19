@@ -30,7 +30,10 @@ const bookSchema = new Schema({
     required: true,
     trim: true
   }
-}, { versionKey: false });
+}, {
+  versionKey: false,
+  timestamps: true
+});
 
 function imgLimit(val) {
   return val.length <= 4;

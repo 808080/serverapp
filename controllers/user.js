@@ -1,6 +1,7 @@
 const User = require('../models/User');
-const encrypt = require('../utils/encrypter');
-const isValidPass = require('../utils/isValidPass');
+const { hashPassword } = require('../utils');
+
+const isValidPass = require('../utils/validation');
 
 const getOne = async (req, res) => {
   try {
@@ -18,7 +19,7 @@ const getOne = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const users = await User.find({});
-   
+
     res.json(users);
   } catch (err) {
     return res.status(500).send(err.message);
@@ -27,11 +28,11 @@ const getAll = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    if(!isValidPass(req.body.password)){
+    if (!isValidPass(req.body.password)) {
       return res.sendStatus(400);
     }
     const body = { ...req.body };
-    body.password = encrypt(req.body.password);
+    body.password = hashPassword(req.body.password);
     let user = await new User(body).save();
 
     user = user.toJSON();
@@ -62,10 +63,10 @@ const update = async (req, res) => {
     const body = req.body;
 
     if (body.password) {
-      if(!isValidPass(req.body.password)){
+      if (!isValidPass(req.body.password)) {
         return res.sendStatus(400);
       }
-      body.password = encrypt(req.body.password);
+      body.password = hashPassword(req.body.password);
     }
 
     if (req.file) {

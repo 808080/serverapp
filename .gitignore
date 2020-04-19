@@ -1,4 +1,4 @@
 node_modules
 config/localConfig.json
-public/bookPreview
-public/userAvatar
+public/bookPreviews
+public/userAvatars

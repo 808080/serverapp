@@ -21,19 +21,18 @@ const userSchema = new Schema({
     trim: true,
     minlength: 5
   },
-  createdOn: {
-    type: Date,
-    default: Date.now
-  },
   password: {
     type: String,
     required: true,
     select: false
   },
-  avatar:{
+  avatar: {
     type: String,
   }
-}, { versionKey: false });
+}, {
+  versionKey: false,
+  timestamps: true
+});
 
 const User = mongoose.model("User", userSchema);
 
