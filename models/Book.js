@@ -29,14 +29,10 @@ const bookSchema = new Schema({
     type: String,
     required: true,
     trim: true
-  },
-  createdOn: {
-    type: Date,
-    default: Date.now
   }
 }, { versionKey: false });
 
-function imgLimit(val){
+function imgLimit(val) {
   return val.length <= 4;
 }
 

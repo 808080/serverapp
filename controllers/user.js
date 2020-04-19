@@ -18,9 +18,7 @@ const getOne = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const users = await User.find({});
-    if (!users) {
-      return res.sendStatus(404);
-    }
+   
     res.json(users);
   } catch (err) {
     return res.status(500).send(err.message);
@@ -36,9 +34,6 @@ const create = async (req, res) => {
     body.password = encrypt(req.body.password);
     let user = await new User(body).save();
 
-    if (!user) {
-      return res.status(400).send('User was not added');
-    }
     user = user.toJSON();
     delete user.password;
     res.json(user);
@@ -54,7 +49,7 @@ const remove = async (req, res) => {
     if (!user) {
       return res.sendStatus(404);
     }
-    res.json(user);
+    res.sendStatus(204);
   } catch (err) {
     return res.status(500).send(err.message);
   }

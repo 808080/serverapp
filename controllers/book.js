@@ -23,13 +23,13 @@ const getAll = async (req, res) => {
 
     let searchParams = { price: { $lte: maxPrice, $gte: minPrice } };
     if (req.query.search) {
-      const searchReq = req.query.search;
+      const searchReq = { $regex: req.query.search, $options: 'i' };
       searchParams = {
         $or: [
-          { title: { $regex: searchReq, $options: 'i' } },
-          { author: { $regex: searchReq, $options: 'i' } },
-          { description: { $regex: searchReq, $options: 'i' } },
-          { fragment: { $regex: searchReq, $options: 'i' } }
+          { title: searchReq },
+          { author: searchReq },
+          { description: searchReq },
+          { fragment: searchReq }
         ],
         $and: [{ price: { $lte: maxPrice, $gte: minPrice } }]
       };
@@ -40,9 +40,7 @@ const getAll = async (req, res) => {
       .limit(perPage)
       .sort({ title: order });
     const booksTotal = await Book.countDocuments(searchParams);
-    if (!books) {
-      return res.sendStatus(404);
-    }
+   
     res.json({ booksTotal, books });
   } catch (err) {
     return res.status(500).send(err.message);
@@ -61,11 +59,8 @@ const create = async (req, res) => {
       }
     }
 
-    let book = await new Book(body).save();
-    if (!book) {
-      return res.status(400).send('Book was not added');
-    }
-    book = book.toJSON();
+    const book = await new Book(body).save();
+   
     res.json(book);
   } catch (err) {
     return res.status(500).send(err.message);
@@ -79,7 +74,6 @@ const remove = async (req, res) => {
     if (!book) {
       return res.sendStatus(404);
     }
-    res.json(book);
   } catch (err) {
     return res.status(500).send(err.message);
   }
@@ -87,7 +81,6 @@ const remove = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    if (!req.params.id) return res.status(400).send('Book is not found');
     const id = req.params.id;
     const body = req.body;
 
@@ -99,10 +92,13 @@ const update = async (req, res) => {
       }
     }
 
+
     const book = await User.findOneAndUpdate({ _id: id }, body, { new: true });
     if (!book) {
       return res.sendStatus(404);
     }
+        //add pic del
+
     res.json(book);
   } catch (err) {
     return res.status(500).send(err.message);
