@@ -1,10 +1,11 @@
-const Book = require('../models/Book');
 const fs = require('fs');
+const { Book } = require('../db/models');
+const { Op } = require("sequelize");
 
 const getOne = async (req, res) => {
   try {
     const id = req.params.id;
-    const book = await Book.findById(id);
+    const book = await Book.findByPk(id);
     if (!book) {
       return res.sendStatus(404);
     }
@@ -18,29 +19,41 @@ const getAll = async (req, res) => {
   try {
     const perPage = +req.query.perPage || 5;
     const page = +req.query.page || 1;
-    const order = +req.query.order || 1;
+    const order = req.query.order || 'ASC';
     const maxPrice = +req.query.maxPrice || Infinity;
     const minPrice = +req.query.minPrice || 0;
+    const searchReq = { [Op.iLike]: `%${req.query.search}%` };
 
-    let searchParams = { price: { $lte: maxPrice, $gte: minPrice } };
+    let where = {
+      price: {
+        [Op.lte]: maxPrice,
+        [Op.gte]: minPrice
+      }
+    }
     if (req.query.search) {
-      const searchReq = { $regex: req.query.search, $options: 'i' };
-      searchParams = {
-        $or: [
+      where = {
+        [Op.or]: [
           { title: searchReq },
           { author: searchReq },
           { description: searchReq },
           { fragment: searchReq }
         ],
-        $and: [{ price: { $lte: maxPrice, $gte: minPrice } }]
-      };
+        price: {
+          [Op.lte]: maxPrice,
+          [Op.gte]: minPrice
+        }
+      }
     }
 
-    const books = await Book.find(searchParams)
-      .skip((perPage * page) - perPage)
-      .limit(perPage)
-      .sort({ title: order });
-    const booksTotal = await Book.countDocuments(searchParams);
+    const searchParams = {
+      order: [['title', order]],
+      limit: perPage,
+      offset: perPage * (page - 1),
+      where
+    };
+
+    const books = await Book.findAll(searchParams);
+    const booksTotal = await Book.count(searchParams);
 
     res.json({ booksTotal, books });
   } catch (err) {
@@ -60,7 +73,7 @@ const create = async (req, res) => {
       }
     }
 
-    const book = await new Book(body).save();
+    const book = await Book.create(body);
 
     res.json(book);
   } catch (err) {
@@ -71,7 +84,7 @@ const create = async (req, res) => {
 const remove = async (req, res) => {
   try {
     const id = req.params.id;
-    const book = await Book.findByIdAndDelete(id);
+    const book = await Book.destroy({ where: { id } });
     if (!book) {
       return res.sendStatus(404);
     }
@@ -100,10 +113,12 @@ const update = async (req, res) => {
       });
     }
 
-    const book = await Book.findOneAndUpdate({ _id: id }, body, { new: true });
-    if (!book) {
-      return res.sendStatus(404);
-    }
+    const [, book] = await Book.update(body, {
+      where: { id },
+      returning: true,
+      plain: true,
+      raw: true
+    });
 
     res.json(book);
   } catch (err) {

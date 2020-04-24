@@ -4,6 +4,13 @@
     "hashType": "your hash",
     "hashKey": "your key",
     "mongoConnection": "mongodb://localhost:27017/serverdb",
-    "jwtKey": "your web token key"
+    "jwtKey": "your web token key",
+    "db": {
+      "username": "postgres",
+      "password": "admin",
+      "database": "bookstore",
+      "host": "127.0.0.1",
+      "dialect": "postgres"
+    }
   }
 }

@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const { User } = require('../db/models/user');
 const { hashPassword, generateAuthToken } = require('../utils');
 const isValidPass = require('../utils/validation');
 
@@ -11,7 +11,9 @@ const signIn = async (req, res) => {
       return res.status(404).send('Username and password must be filled in!');
     }
 
-    let user = await User.findOne({ login }).select('+password');
+    let user = await User.findOne({ where: { login }, attributes: { include: ['password'] } });
+    console.log(user.password);
+
     if (!user) {
       return res.status(404).send('User doesn\'t exist.');
     }
@@ -21,7 +23,7 @@ const signIn = async (req, res) => {
     }
     user = user.toJSON();
     delete user.password;
-    const token = await generateAuthToken({ id: user._id });
+    const token = await generateAuthToken({ id: user.id });
     return res.status(200).send({ user, token });
   } catch (err) {
     return res.status(500).send(err.message);
@@ -38,7 +40,7 @@ const signUp = async (req, res) => {
     let user = await User.create(body);
     user = user.toJSON();
     delete user.password;
-    const token = await generateAuthToken({ id: user._id });
+    const token = await generateAuthToken({ id: user.id });
     return res.status(200).send({ user, token });
   } catch (err) {
     if (err.code === 11000) {

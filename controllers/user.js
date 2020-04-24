@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const { User } = require('../db/models');
 const { hashPassword } = require('../utils');
 
 const isValidPass = require('../utils/validation');
@@ -6,7 +6,7 @@ const isValidPass = require('../utils/validation');
 const getOne = async (req, res) => {
   try {
     const id = req.params.id;
-    const user = await User.findById(id);
+    const user = await User.findByPk(id);
     if (!user) {
       return res.sendStatus(404);
     }
@@ -18,7 +18,7 @@ const getOne = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await User.findAll();
 
     res.json(users);
   } catch (err) {
@@ -33,7 +33,7 @@ const create = async (req, res) => {
     }
     const body = { ...req.body };
     body.password = hashPassword(req.body.password);
-    let user = await new User(body).save();
+    let user = await User.create(body);
 
     user = user.toJSON();
     delete user.password;
@@ -46,7 +46,7 @@ const create = async (req, res) => {
 const remove = async (req, res) => {
   try {
     const id = req.params.id;
-    const user = await User.findByIdAndDelete(id);
+    const user = await User.destroy({ where: { id } });
     if (!user) {
       return res.sendStatus(404);
     }
@@ -79,10 +79,13 @@ const update = async (req, res) => {
       body.avatar = `${req.file.destination}/${req.file.filename}`.substr(1);
     }
 
-    const user = await User.findOneAndUpdate({ _id: id }, body, { new: true });
-    if (!user) {
-      return res.sendStatus(404);
-    }
+    const [,user] = await User.update(body, {
+      where: { id },
+      returning: true,
+      plain: true,
+      raw: true
+    });
+
     res.json(user);
   } catch (err) {
     return res.status(500).send(err.message);

@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const config = require('./config');
+
 const userController = require('./controllers/user');
 const userAuth = require('./controllers/auth');
 const checkAuth = require('./middleware/checkAuth');
@@ -38,5 +40,6 @@ app.post('/api/books', checkAuth, imgUpload.bookImgUpload, bookController.create
 app.patch('/api/books/:id', checkAuth, imgUpload.bookImgUpload, bookController.update);
 app.delete('/api/books/:id', checkAuth, bookController.remove);
 
-
-module.exports = app;
+app.listen(config.port, () => {
+  console.log(`Server is listening on ${config.port} port`);
+});
