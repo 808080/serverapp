@@ -69,6 +69,12 @@ const update = async (req, res) => {
       body.password = hashPassword(req.body.password);
     }
 
+    if (body.login) {
+      if (!isValidPass(req.body.login)) {
+        return res.sendStatus(400);
+      }
+    }
+
     if (req.file) {
       body.avatar = `${req.file.destination}/${req.file.filename}`.substr(1);
     }
