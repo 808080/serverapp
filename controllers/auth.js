@@ -1,6 +1,6 @@
-const { User } = require('../db/models/user');
+const { User } = require('../db/models');
 const { hashPassword, generateAuthToken } = require('../utils');
-const isValidPass = require('../utils/validation');
+const isValidLength = require('../utils/validation');
 
 const signIn = async (req, res) => {
   try {
@@ -12,7 +12,6 @@ const signIn = async (req, res) => {
     }
 
     let user = await User.findOne({ where: { login }, attributes: { include: ['password'] } });
-    console.log(user.password);
 
     if (!user) {
       return res.status(404).send('User doesn\'t exist.');
@@ -26,13 +25,14 @@ const signIn = async (req, res) => {
     const token = await generateAuthToken({ id: user.id });
     return res.status(200).send({ user, token });
   } catch (err) {
+    console.log(err);
     return res.status(500).send(err.message);
   }
 }
 
 const signUp = async (req, res) => {
   try {
-    if (!isValidPass(req.body.password)) {
+    if (!isValidLength(req.body.password)) {
       return res.sendStatus(400);
     }
     const body = { ...req.body };

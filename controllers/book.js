@@ -31,18 +31,12 @@ const getAll = async (req, res) => {
       }
     }
     if (req.query.search) {
-      where = {
-        [Op.or]: [
-          { title: searchReq },
-          { author: searchReq },
-          { description: searchReq },
-          { fragment: searchReq }
-        ],
-        price: {
-          [Op.lte]: maxPrice,
-          [Op.gte]: minPrice
-        }
-      }
+      where[Op.or] = [
+        { title: searchReq },
+        { author: searchReq },
+        { description: searchReq },
+        { fragment: searchReq }
+      ]
     }
 
     const searchParams = {
@@ -52,10 +46,9 @@ const getAll = async (req, res) => {
       where
     };
 
-    const books = await Book.findAll(searchParams);
-    const booksTotal = await Book.count(searchParams);
+    const { rows: data, count: total } = await Book.findAndCountAll(searchParams);
 
-    res.json({ booksTotal, books });
+    res.json({ total, data });
   } catch (err) {
     return res.status(500).send(err.message);
   }

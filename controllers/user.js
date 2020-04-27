@@ -1,7 +1,7 @@
 const { User } = require('../db/models');
 const { hashPassword } = require('../utils');
 
-const isValidPass = require('../utils/validation');
+const isValidLength = require('../utils/validation');
 
 const getOne = async (req, res) => {
   try {
@@ -28,7 +28,7 @@ const getAll = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    if (!isValidPass(req.body.password)) {
+    if (!isValidLength(req.body.password)) {
       return res.sendStatus(400);
     }
     const body = { ...req.body };
@@ -63,14 +63,14 @@ const update = async (req, res) => {
     const body = req.body;
 
     if (body.password) {
-      if (!isValidPass(req.body.password)) {
+      if (!isValidLength(req.body.password)) {
         return res.sendStatus(400);
       }
       body.password = hashPassword(req.body.password);
     }
 
     if (body.login) {
-      if (!isValidPass(req.body.login)) {
+      if (!isValidLength(req.body.login)) {
         return res.sendStatus(400);
       }
     }

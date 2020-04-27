@@ -1,9 +1,7 @@
-validatePass = (pass) => {
-  let trimmedPass = pass.trim();
-  if (trimmedPass.length < 5) {
+module.exports = (str) => {
+  let trimmedStr = str.trim();
+  if (trimmedStr.length < 5) {
     return false;
   }
   return true;
 }
-
-module.exports = validatePass;
